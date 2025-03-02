@@ -22,6 +22,7 @@ class ProfileScreenVM extends ProfileScreenModel {
       setJobTitleErrorMessage("");
       setAge("");
       setSelectedRole(role);
+      print("SET ROLE : $role");
       setPhoneNumberErrorMessage("");
       setExperienceErrorMessage("");
       setAgeErrorMessage("");
@@ -211,7 +212,8 @@ class ProfileScreenVM extends ProfileScreenModel {
 
       if (phoneNumberErrorMessage.isEmpty &&
           experienceErrorMessage.isEmpty &&
-          ageErrorMessage.isEmpty) {
+          ageErrorMessage.isEmpty &&
+          descriptionErrorMessage.isEmpty) {
         // Retrieve current ID from secure storage
         String? idResponse =
             await secureStorageService.retrieveData(AppConstants.idKey);
@@ -250,6 +252,7 @@ class ProfileScreenVM extends ProfileScreenModel {
               "age": age,
             };
             print("User details updated successfully.");
+            print("IMAGE PATH : $imagepath");
             setIsValidUser(true);
           } else {
             print("Image path is empty, user data not updated.");
@@ -263,6 +266,7 @@ class ProfileScreenVM extends ProfileScreenModel {
             "fullName": fullName,
             "password": password,
             "profile": {
+              "role": selectedRole,
               "profileImg": imagepath,
               "phoneNumber": phoneNumber,
               "experience": experience,
@@ -272,7 +276,9 @@ class ProfileScreenVM extends ProfileScreenModel {
             },
             "clients": []
           };
+          print("MY IMAGE PATH : $imagepath");
           usersList.add(userData);
+          print("USER : $userData");
           print("New user added successfully.");
         }
 

@@ -7,9 +7,11 @@ class ProfileBO {
   String experience;
   String description;
   String jobTitle;
+  String role;
   String age;
   ProfileBO({
     required this.age,
+    required this.role,
     required this.description,
     required this.experience,
     required this.jobTitle,

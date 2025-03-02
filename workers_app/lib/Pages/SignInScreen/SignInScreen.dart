@@ -247,7 +247,7 @@ class _SignInScreenState extends State<SignInScreen> {
                         onTap: () async {
                           !_signInScreenVM.isLoading
                               ? await _signInScreenVM.validateDetails()
-                              : null; // Wait for signUp to complete
+                              : null; // Wait for signUp to completeZ
                           if (_signInScreenVM.isUserCanLogIn) {
                             Navigator.pushReplacement(
                                 context,

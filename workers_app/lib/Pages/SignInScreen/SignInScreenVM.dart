@@ -93,46 +93,45 @@ class SignInScreenVM extends SignInScreenModel {
 
   Future<void> validateDetails() async {
     try {
-      setLoading(true);
-      print("LOADING: $isLoading");
       validateEmail();
       validatePassword();
       if (email.isNotEmpty && password.isNotEmpty) {
         String? listOfUserResponse = await secureStorageService
             .retrieveData(AppConstants.listOfUsersKey);
-
         List<dynamic> userData = [];
         if (listOfUserResponse != null && listOfUserResponse.isNotEmpty) {
           print("IF DA");
           userData = jsonDecode(listOfUserResponse);
           for (var user in userData) {
+            print(user['emailId']);
             if (user['emailId'] == email && user['password'] == password) {
-              print("IRUKU DA");
-              setUser(UserBO(
+              print("IRUKU DA ${user['profile']['role']}");
+              setUser(
+                UserBO(
                   emailId: user['emailId'],
                   fullName: user['fullName'],
                   id: user['id'].toString(),
                   password: user['password'],
                   profile: ProfileBO(
-                      age: user['profile']['age'].toString(),
-                      description: user['profile']['description'],
-                      experience: user['profile']['experience'].toString(),
-                      jobTitle: user['profile']['jobTitle'],
-                      phoneNumber: user['profile']['phoneNumber'].toString(),
-                      profileImg: user['profile']['profileImg'])));
-              print("MY USER : $myUser");
+                    age: user['profile']['age'].toString(),
+                    description: user['profile']['description'],
+                    experience: user['profile']['experience'].toString(),
+                    jobTitle: user['profile']['jobTitle'],
+                    phoneNumber: user['profile']['phoneNumber'].toString(),
+                    profileImg: user['profile']['profileImg'],
+                    role: user['profile']['role'],
+                  ),
+                ),
+              );
+              print("MY USER IMAGE: ${myUser.profile.profileImg}");
               setIsUserCanLogIn(true);
-              await Future.delayed(const Duration(seconds: 3));
-              setLoading(false);
               return;
             } else {
-              setLoading(false);
-              print("ILLA DA");
               setEmailErrorMessage("Email or password doesn't match");
             }
           }
         } else {
-          setEmailErrorMessage("Email not found, plea");
+          setEmailErrorMessage("Email not found");
         }
       }
     } catch (ex) {
