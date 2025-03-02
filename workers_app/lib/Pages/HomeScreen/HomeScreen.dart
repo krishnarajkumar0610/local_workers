@@ -6,6 +6,7 @@ import 'package:workers_app/BOs/UserBO.dart';
 import 'package:workers_app/Helpers/AppConstants/AppConstants.dart';
 import 'package:workers_app/Helpers/ResponsiveUI.dart';
 import 'package:workers_app/Pages/HomeScreen/HomeScreenProvider.dart';
+import 'package:workers_app/Pages/Reusables/CustomTextFormField.dart';
 import 'package:workers_app/Pages/SignInScreen/SignInScreen.dart';
 import 'package:workers_app/Pages/ThemeProvider/ThemeProvider.dart';
 
@@ -18,6 +19,16 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  late TextEditingController _searchController;
+  late FocusNode _searchFocusNode;
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _searchController = TextEditingController();
+    _searchFocusNode = FocusNode();
+  }
+
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
@@ -34,23 +45,28 @@ class _HomeScreenState extends State<HomeScreen> {
                   "Welcome ${provider.user!.fullName}",
                   style: const TextStyle(
                     overflow: TextOverflow.ellipsis,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
                 actions: [
                   Consumer<ThemeProvider>(
                     builder: (context, themeProvider, child) {
                       return InkWell(
-                        splashColor:
-                            Colors.transparent, // Removes ripple effect
-                        highlightColor:
-                            Colors.transparent, // Removes highlight effect
+                        splashColor: Colors.transparent,
+                        highlightColor: Colors.transparent,
                         hoverColor: Colors.transparent,
                         onTap: () {
                           themeProvider.updateTheme();
                         },
                         child: themeProvider.isDarkTheme
-                            ? const Icon(Icons.dark_mode)
-                            : const Icon(Icons.sunny, color: Colors.yellow),
+                            ? const Icon(
+                                Icons.dark_mode,
+                                color: Colors.white,
+                              )
+                            : const Icon(
+                                Icons.sunny,
+                                color: Colors.yellow,
+                              ),
                       );
                     },
                   ),
@@ -63,6 +79,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Column(
                   children: [
                     UserAccountsDrawerHeader(
+                      decoration: const BoxDecoration(color: Colors.grey),
                       accountName: Text(provider.user?.fullName ?? "Guest"),
                       accountEmail: Text(provider.user?.emailId ?? "No Email"),
                       currentAccountPicture: ClipOval(
@@ -103,6 +120,82 @@ class _HomeScreenState extends State<HomeScreen> {
                   ],
                 ),
               ),
+              body: provider.user!.profile.role.toLowerCase() == "owner"
+                  ? provider.isLoading
+                      ? const CircularProgressIndicator()
+                      : Container(
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 15.w(context),
+                              vertical: 15.h(context)),
+                          width: double.infinity,
+                          height: double.infinity,
+                          child: Column(
+                            children: [
+                              SizedBox(
+                                height: 50.h(context),
+                                child: CustomTextFormField(
+                                  borderColor: Colors.black,
+                                  onChanged: (value) =>
+                                      provider.updateSearchText(value),
+                                  borderRadius: 12,
+                                  hintText: "Search worker",
+                                  style: const TextStyle(),
+                                  enabledfocusedBorder: Colors.black,
+                                  node: _searchFocusNode,
+                                ),
+                              ),
+                              Container(
+                                height: 620,
+                                width: double.infinity,
+                                margin: EdgeInsets.only(
+                                  top: 10.h(context),
+                                ),
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 15.w(context),
+                                ),
+                                decoration:
+                                    const BoxDecoration(color: Colors.red),
+                                child: ListView.separated(
+                                  itemBuilder: (context, index) => Container(
+                                    margin: EdgeInsets.only(
+                                        top: index == 0 ? 5.h(context) : 0),
+                                    height: 150.h(context),
+                                    width: 200.w(context),
+                                    decoration: BoxDecoration(
+                                      color: Colors.yellow,
+                                      borderRadius:
+                                          BorderRadius.circular(12.r(context)),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        provider.filteredList[index].profile
+                                                    .profileImg !=
+                                                null
+                                            ? Image.file(
+                                                File(provider
+                                                    .filteredList[index]
+                                                    .profile
+                                                    .profileImg),
+                                                fit: BoxFit.cover,
+                                                height: 80,
+                                                width: 80,
+                                              )
+                                            : Image.asset(
+                                                "${AppConstants.imageBaseURL}worker.png")
+                                      ],
+                                    ),
+                                  ),
+                                  separatorBuilder: (context, index) =>
+                                      SizedBox(
+                                    height: 20.h(context),
+                                  ),
+                                  itemCount: provider.filteredList.length,
+                                ),
+                              )
+                            ],
+                          ),
+                        )
+                  : const Text("WORKER"),
             ),
           );
         },

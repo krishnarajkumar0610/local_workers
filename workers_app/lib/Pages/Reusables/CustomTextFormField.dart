@@ -11,7 +11,6 @@ class CustomTextFormField extends StatelessWidget {
   final Color borderColor;
   final double borderRadius;
   final bool? visibility;
-  final String errorMessage;
   final TextInputType? keyboardType;
   final int? maxLines; // Supports dynamic expansion
   final Function(String)? onChanged;
@@ -27,7 +26,6 @@ class CustomTextFormField extends StatelessWidget {
     required this.enabledfocusedBorder,
     this.controller,
     required this.node,
-    required this.errorMessage,
     this.filledColor,
     this.visibility,
     this.prefixIcon,

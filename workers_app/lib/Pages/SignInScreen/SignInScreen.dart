@@ -115,6 +115,7 @@ class _SignInScreenState extends State<SignInScreen> {
                             "Sign Up",
                             style: TextStyle(
                               color: Color(0xff4D81E7),
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
                         ),
@@ -138,7 +139,6 @@ class _SignInScreenState extends State<SignInScreen> {
                     SizedBox(
                       height: 46.h(context),
                       child: CustomTextFormField(
-                        errorMessage: _signInScreenVM.emailErrorMessage,
                         onChanged: (value) =>
                             _signInScreenVM.updateEmail(value),
                         controller: _emailController,
@@ -191,7 +191,6 @@ class _SignInScreenState extends State<SignInScreen> {
                     SizedBox(
                       height: 46.h(context),
                       child: CustomTextFormField(
-                        errorMessage: _signInScreenVM.passwordErrorMessage,
                         onChanged: (value) =>
                             _signInScreenVM.updatePassword(value),
                         controller: _passwordController,

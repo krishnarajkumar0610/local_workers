@@ -267,7 +267,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         enabledfocusedBorder: const Color(0xffABABAB),
                         controller: _phoneNumberController,
                         node: _phoneNumberFocusNode,
-                        errorMessage: "",
                         onChanged: (value) =>
                             _profileScreenVM.updatePhoneNumber(value),
                       ),
@@ -338,7 +337,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           enabledfocusedBorder: const Color(0xffABABAB),
                           controller: _jobTitleController,
                           node: _jobTitleFocusNode,
-                          errorMessage: "",
                           onChanged: (value) =>
                               _profileScreenVM.updateJobTitle(value),
                         ),
@@ -414,7 +412,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           enabledfocusedBorder: const Color(0xffABABAB),
                           controller: _experienceController,
                           node: _experienceFocusNode,
-                          errorMessage: "",
                           onChanged: (value) =>
                               _profileScreenVM.updateExperience(value),
                         ),
@@ -479,7 +476,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         enabledfocusedBorder: const Color(0xffABABAB),
                         controller: _ageController,
                         node: _ageFocusNode,
-                        errorMessage: "",
                         onChanged: (value) => _profileScreenVM.updateAge(value),
                       ),
                     ),
@@ -536,7 +532,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         enabledfocusedBorder: const Color(0xffABABAB),
                         controller: _descriptionController,
                         node: _descriptionFocusNode,
-                        errorMessage: "",
                         onChanged: (value) =>
                             _profileScreenVM.updateDescription(value),
                       ),

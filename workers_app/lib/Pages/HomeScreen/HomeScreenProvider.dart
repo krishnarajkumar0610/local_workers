@@ -13,6 +13,8 @@ import 'package:workers_app/Services/SecureStorageService/ISecureStorageService.
 class HomeScreenProvider extends ChangeNotifier {
   UserBO? user;
   List listOfUsers = [];
+  String searchText = "";
+  bool isLoading = false;
   ISecureStorageService secureStorageService =
       GetIt.instance.get<ISecureStorageService>();
   List filteredList = [];
@@ -27,6 +29,8 @@ class HomeScreenProvider extends ChangeNotifier {
 
   Future<void> getUsers() async {
     try {
+      isLoading = true;
+      notifyListeners();
       String? usersResponse =
           await secureStorageService.retrieveData(AppConstants.listOfUsersKey);
       if (usersResponse != null && usersResponse.isNotEmpty) {
@@ -50,7 +54,19 @@ class HomeScreenProvider extends ChangeNotifier {
           );
         }
         filteredList = listOfUsers;
+        await Future.delayed(const Duration(seconds: 3));
+        isLoading = false;
+        notifyListeners();
       }
+    } catch (ex) {
+      print(ex);
+    }
+  }
+
+  void updateSearchText(String value) {
+    try {
+      searchText = value;
+      notifyListeners();
     } catch (ex) {
       print(ex);
     }

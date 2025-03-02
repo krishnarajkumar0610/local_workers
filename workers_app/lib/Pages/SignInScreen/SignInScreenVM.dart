@@ -126,10 +126,9 @@ class SignInScreenVM extends SignInScreenModel {
               print("MY USER IMAGE: ${myUser.profile.profileImg}");
               setIsUserCanLogIn(true);
               return;
-            } else {
-              setEmailErrorMessage("Email or password doesn't match");
             }
           }
+          setEmailErrorMessage("Email or password wrong");
         } else {
           setEmailErrorMessage("Email not found");
         }
