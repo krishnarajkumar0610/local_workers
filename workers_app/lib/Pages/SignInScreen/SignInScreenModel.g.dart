@@ -131,8 +131,70 @@ mixin _$SignInScreenModel on _SignInScreenModelBase, Store {
     });
   }
 
+  late final _$isLoadingAtom =
+      Atom(name: '_SignInScreenModelBase.isLoading', context: context);
+
+  @override
+  bool get isLoading {
+    _$isLoadingAtom.reportRead();
+    return super.isLoading;
+  }
+
+  bool _isLoadingIsInitialized = false;
+
+  @override
+  set isLoading(bool value) {
+    _$isLoadingAtom.reportWrite(
+        value, _isLoadingIsInitialized ? super.isLoading : null, () {
+      super.isLoading = value;
+      _isLoadingIsInitialized = true;
+    });
+  }
+
+  late final _$myUserAtom =
+      Atom(name: '_SignInScreenModelBase.myUser', context: context);
+
+  @override
+  UserBO get myUser {
+    _$myUserAtom.reportRead();
+    return super.myUser;
+  }
+
+  bool _myUserIsInitialized = false;
+
+  @override
+  set myUser(UserBO value) {
+    _$myUserAtom.reportWrite(value, _myUserIsInitialized ? super.myUser : null,
+        () {
+      super.myUser = value;
+      _myUserIsInitialized = true;
+    });
+  }
+
   late final _$_SignInScreenModelBaseActionController =
       ActionController(name: '_SignInScreenModelBase', context: context);
+
+  @override
+  void setUser(UserBO value) {
+    final _$actionInfo = _$_SignInScreenModelBaseActionController.startAction(
+        name: '_SignInScreenModelBase.setUser');
+    try {
+      return super.setUser(value);
+    } finally {
+      _$_SignInScreenModelBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void setLoading(bool value) {
+    final _$actionInfo = _$_SignInScreenModelBaseActionController.startAction(
+        name: '_SignInScreenModelBase.setLoading');
+    try {
+      return super.setLoading(value);
+    } finally {
+      _$_SignInScreenModelBaseActionController.endAction(_$actionInfo);
+    }
+  }
 
   @override
   void setIsVisible(bool value) {
@@ -208,7 +270,9 @@ password: ${password},
 emailErrorMessage: ${emailErrorMessage},
 passwordErrorMessage: ${passwordErrorMessage},
 isVisible: ${isVisible},
-isUserCanLogIn: ${isUserCanLogIn}
+isUserCanLogIn: ${isUserCanLogIn},
+isLoading: ${isLoading},
+myUser: ${myUser}
     ''';
   }
 }

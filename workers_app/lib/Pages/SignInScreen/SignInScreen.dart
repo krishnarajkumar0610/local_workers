@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:mobx/mobx.dart';
 import 'package:workers_app/Helpers/AppConstants/AppConstants.dart';
 import 'package:workers_app/Helpers/ResponsiveUI.dart';
+import 'package:workers_app/Pages/HomeScreen/HomeScreen.dart';
 import 'package:workers_app/Pages/Reusables/CustomButton.dart';
 import 'package:workers_app/Pages/Reusables/CustomTextFormField.dart';
 import 'package:workers_app/Pages/SignInScreen/SignInScreenVM.dart';
@@ -55,7 +57,7 @@ class _SignInScreenState extends State<SignInScreen> {
           alignment: Alignment.center,
           width: MediaQuery.of(context).size.width,
           height: MediaQuery.of(context).size.height,
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
@@ -75,7 +77,7 @@ class _SignInScreenState extends State<SignInScreen> {
                   ? 625.h(context)
                   : 581.h(context),
               decoration: BoxDecoration(
-                color: Color(0xffFFFFFF),
+                color: const Color(0xffFFFFFF),
                 borderRadius: BorderRadius.circular(12.r(context)),
               ),
               child: Center(
@@ -240,24 +242,34 @@ class _SignInScreenState extends State<SignInScreen> {
                     SizedBox(
                       height: 24.h(context),
                     ),
-                    InkWell(
-                      onTap: () {
-                        _SignInScreenVM.validateDetails();
-                        // _SignInScreenVM.isUserCanLogIn ? Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
-                        //   return
-                        // },)) :
-                      },
-                      child: CustomButton(
-                        height: 48,
-                        width: 295,
-                        buttonText: const Text(
-                          "Log In",
-                          style: TextStyle(color: Colors.white),
+                    Observer(builder: (context) {
+                      return InkWell(
+                        onTap: () async {
+                          !_SignInScreenVM.isLoading
+                              ? await _SignInScreenVM.validateDetails()
+                              : null; // Wait for signUp to complete
+                          if (_SignInScreenVM.isUserCanLogIn) {
+                            Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const HomeScreen(),
+                                ));
+                          }
+                        },
+                        child: CustomButton(
+                          height: 48,
+                          width: 295,
+                          buttonText: _SignInScreenVM.isLoading
+                              ? const CircularProgressIndicator()
+                              : const Text(
+                                  "Log In",
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                          buttonColor: const Color(0xff1D61E7),
+                          borderRadius: 10,
                         ),
-                        buttonColor: const Color(0xff1D61E7),
-                        borderRadius: 10,
-                      ),
-                    ),
+                      );
+                    }),
                     SizedBox(
                       height: 24.h(context),
                     ),

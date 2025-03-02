@@ -4,14 +4,16 @@ import 'package:dart_json_mapper/dart_json_mapper.dart';
 class ProfileBO {
   String profileImg;
   String phoneNumber;
+  String experience;
   String description;
-  int experience;
-  int age;
+  String jobTitle;
+  String age;
   ProfileBO({
-    required this.profileImg,
-    required this.description,
     required this.age,
+    required this.description,
     required this.experience,
+    required this.jobTitle,
     required this.phoneNumber,
+    required this.profileImg,
   });
 }

@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:dart_json_mapper/dart_json_mapper.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:workers_app/BOs/UserBO/UserBO.dart';
 import 'package:workers_app/Helpers/AppConstants/AppConstants.dart';
 import 'package:workers_app/Pages/ProfileScreen/ProfileScreenModel.dart';
 import 'package:workers_app/Pages/material.dart';
@@ -208,81 +207,90 @@ class ProfileScreenVM extends ProfileScreenModel {
 
   Future<void> saveDetails() async {
     try {
-      await secureStorageService.deleteAllData();
-      // validateDetails();
-      // if (phoneNumberErrorMessage.isEmpty &&
-      //     experienceErrorMessage.isEmpty &&
-      //     ageErrorMessage.isEmpty) {
-      //   String? idResponse =
-      //       await secureStorageService.retrieveData(AppConstants.idKey);
-      //   int currentId = jsonDecode(idResponse ?? "0");
+      validateDetails();
 
-      //   // Retrieve existing users from storage
-      //   String? usersResponse = await secureStorageService
-      //       .retrieveData(AppConstants.listOfUsersKey);
+      if (phoneNumberErrorMessage.isEmpty &&
+          experienceErrorMessage.isEmpty &&
+          ageErrorMessage.isEmpty) {
+        // Retrieve current ID from secure storage
+        String? idResponse =
+            await secureStorageService.retrieveData(AppConstants.idKey);
+        int currentId = 0;
 
-      //   List<dynamic> usersList = [];
+        currentId = jsonDecode(idResponse ?? "0");
+        print("CURRENT ID: $currentId");
+        // Retrieve existing users from storage
+        String? usersResponse = await secureStorageService
+            .retrieveData(AppConstants.listOfUsersKey);
 
-      //   if (usersResponse != null && usersResponse.isNotEmpty) {
-      //     try {
-      //       usersList = jsonDecode(usersResponse);
-      //     } catch (e) {
-      //       print("Error decoding existing users: $e");
-      //       usersList = [];
-      //     }
-      //   }
+        List<dynamic> usersList = [];
 
-      //   // Check if user already exists
-      //   int userIndex =
-      //       usersList.indexWhere((user) => user["emailId"] == email);
+        if (usersResponse != null && usersResponse.isNotEmpty) {
+          try {
+            usersList = jsonDecode(usersResponse);
+          } catch (e) {
+            print("Error decoding usersResponse: $e");
+            usersList = []; // Reset to empty list if decoding fails
+          }
+        }
 
-      //   if (userIndex != -1) {
-      //     // User exists, update details if imagePath is not empty
-      //     if (imagepath.isNotEmpty) {
-      //       usersList[userIndex]["profile"] = {
-      //         "profileImg": imagepath,
-      //         "phoneNumber": phoneNumber,
-      //         "experience": experience,
-      //         "description": description,
-      //         "jobTitle": jobTitle,
-      //         "age": age,
-      //       };
-      //       setIsValidUser(true);
-      //     } else {
-      //       print("Image path is empty, user data not updated.");
-      //       setIsValidUser(false);
-      //     }
-      //   } else {
-      //     // New user, add to list
-      //     Map<String, dynamic> userData = {
-      //       "id": ++currentId,
-      //       "emailId": email,
-      //       "fullName": fullName,
-      //       "password": password,
-      //       "profile": {
-      //         "profileImg": imagepath,
-      //         "phoneNumber": phoneNumber,
-      //         "experience": experience,
-      //         "description": description,
-      //         "jobTitle": jobTitle,
-      //         "age": age,
-      //       },
-      //       "clients": []
-      //     };
+        // Check if user already exists
+        int userIndex = usersList
+            .indexWhere((user) => user is Map && user["emailId"] == email);
 
-      //     usersList.add(userData);
-      //   }
-      //   print(usersList);
-      //   // Save updated user list
-      //   bool userSignUpResponse = await secureStorageService.saveData(
-      //       AppConstants.listOfUsersKey, usersList);
-      //   bool idSaveResponse = await secureStorageService.saveData(
-      //       AppConstants.idKey, currentId);
-      //   print("SAVE RESPONSE: $userSignUpResponse");
-      //   setIsValidUser(true);
-      // }
-    } catch (ex) {
+        if (userIndex != -1) {
+          // User exists, update or replace details
+          if (imagepath.isNotEmpty) {
+            usersList[userIndex]["profile"] = {
+              "profileImg": imagepath,
+              "phoneNumber": phoneNumber,
+              "experience": experience,
+              "description": description,
+              "jobTitle": jobTitle,
+              "age": age,
+            };
+            print("User details updated successfully.");
+            setIsValidUser(true);
+          } else {
+            print("Image path is empty, user data not updated.");
+            setIsValidUser(false);
+          }
+        } else {
+          // New user, add to list
+          Map<String, dynamic> userData = {
+            "id": ++currentId,
+            "emailId": email,
+            "fullName": fullName,
+            "password": password,
+            "profile": {
+              "profileImg": imagepath,
+              "phoneNumber": phoneNumber,
+              "experience": experience,
+              "description": description,
+              "jobTitle": jobTitle,
+              "age": age,
+            },
+            "clients": []
+          };
+          usersList.add(userData);
+          print("New user added successfully.");
+        }
+
+        // Save updated user list
+        bool userSignUpResponse = await secureStorageService.saveData(
+            AppConstants.listOfUsersKey, jsonEncode(usersList));
+        bool idSaveResponse = await secureStorageService.saveData(
+            AppConstants.idKey, jsonEncode(currentId));
+
+        print(
+            "SAVE RESPONSE: $userSignUpResponse, ID SAVE RESPONSE: $idSaveResponse");
+        setIsValidUser(true);
+      } else {
+        print("Validation errors exist. User data not saved.");
+      }
+    } catch (ex, stackTrace) {
       print("Error in saveDetails: $ex");
+      print("Stack Trace: $stackTrace");
     }
   }
 }

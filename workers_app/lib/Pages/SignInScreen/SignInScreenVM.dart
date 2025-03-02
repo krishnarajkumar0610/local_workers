@@ -1,3 +1,8 @@
+import 'dart:convert';
+
+import 'package:dart_json_mapper/dart_json_mapper.dart';
+import 'package:workers_app/BOs/ProfileBO.dart';
+import 'package:workers_app/BOs/UserBO.dart';
 import 'package:workers_app/Helpers/AppConstants/AppConstants.dart';
 import 'package:workers_app/Pages/SignInScreen/SignInScreenModel.dart';
 
@@ -9,7 +14,8 @@ class SignInScreenVM extends SignInScreenModel {
       setEmailErrorMessage("");
       setPasswordErrorMessage("");
       setIsVisible(false);
-      setIsUserCanLogIn(true);
+      setIsUserCanLogIn(false);
+      setLoading(false);
     } catch (ex) {
       print(ex);
     }
@@ -52,13 +58,10 @@ class SignInScreenVM extends SignInScreenModel {
     try {
       if (email.isEmpty) {
         setEmailErrorMessage("Please enter email ID");
-        setIsUserCanLogIn(false);
       } else if (!AppConstants.emailRegEx.hasMatch(email)) {
         setEmailErrorMessage("Please enter valid email ID");
-        setIsUserCanLogIn(false);
       } else {
         setEmailErrorMessage("");
-        setIsUserCanLogIn(true);
       }
     } catch (ex) {
       print("Email is Error: $ex");
@@ -69,13 +72,10 @@ class SignInScreenVM extends SignInScreenModel {
     try {
       if (password.isEmpty) {
         setPasswordErrorMessage("Please enter Password");
-        setIsUserCanLogIn(false);
       } else if (!AppConstants.passwordRegEx.hasMatch(password)) {
         setPasswordErrorMessage("Please enter valid Password");
-        setIsUserCanLogIn(false);
       } else {
         setPasswordErrorMessage("");
-        setIsUserCanLogIn(true);
       }
     } catch (ex) {
       print("Password is Error: $ex");
@@ -91,10 +91,50 @@ class SignInScreenVM extends SignInScreenModel {
     }
   }
 
-  void validateDetails() {
+  Future<void> validateDetails() async {
     try {
+      setLoading(true);
+      print("LOADING: $isLoading");
       validateEmail();
       validatePassword();
+      if (email.isNotEmpty && password.isNotEmpty) {
+        String? listOfUserResponse = await secureStorageService
+            .retrieveData(AppConstants.listOfUsersKey);
+
+        List<dynamic> userData = [];
+        if (listOfUserResponse != null && listOfUserResponse.isNotEmpty) {
+          print("IF DA");
+          userData = jsonDecode(listOfUserResponse);
+          for (var user in userData) {
+            if (user['emailId'] == email && user['password'] == password) {
+              print("IRUKU DA");
+              setUser(UserBO(
+                  emailId: user['emailId'],
+                  fullName: user['fullName'],
+                  id: user['id'].toString(),
+                  password: user['password'],
+                  profile: ProfileBO(
+                      age: user['profile']['age'].toString(),
+                      description: user['profile']['description'],
+                      experience: user['profile']['experience'].toString(),
+                      jobTitle: user['profile']['jobTitle'],
+                      phoneNumber: user['profile']['phoneNumber'].toString(),
+                      profileImg: user['profile']['profileImg'])));
+              print("MY USER : $myUser");
+              setIsUserCanLogIn(true);
+              await Future.delayed(const Duration(seconds: 3));
+              setLoading(false);
+              return;
+            } else {
+              setLoading(false);
+              print("ILLA DA");
+              setEmailErrorMessage("Email or password doesn't match");
+            }
+          }
+        } else {
+          setEmailErrorMessage("Email not found, plea");
+        }
+      }
     } catch (ex) {
       print(ex);
     }

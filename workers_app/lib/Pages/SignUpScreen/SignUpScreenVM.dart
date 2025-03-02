@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:dart_json_mapper/dart_json_mapper.dart';
-import 'package:workers_app/BOs/UserBO/UserBO.dart';
 import 'package:workers_app/Helpers/AppConstants/AppConstants.dart';
 import 'package:workers_app/Pages/SignUpScreen/SignUpScreenModel.dart';
 

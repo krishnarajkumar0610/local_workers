@@ -57,7 +57,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _descriptionFocusNode = FocusNode();
     _jobTitleFocusNode = FocusNode();
     _profileScreenVM = ProfileScreenVM(
-        widget.email, widget.fullName, widget.password, widget.role);
+        widget.email, widget.password, widget.fullName, widget.role);
     _phoneNumberFocusNode.addListener(() {
       if (_phoneNumberFocusNode.hasFocus) {
         _profileScreenVM.removeErrorMessage("phone number");
@@ -565,13 +565,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       height: 15.h(context),
                     ),
                     InkWell(
-                      onTap: () {
-                        _profileScreenVM.saveDetails();
-                        !_profileScreenVM.isValidUser
-                            ? ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                    content: Text("User already exits")))
-                            : null;
+                      onTap: () async {
+                        await _profileScreenVM.saveDetails();
+
                         if (_profileScreenVM.isValidUser) {
                           Navigator.pushAndRemoveUntil(
                               context,
