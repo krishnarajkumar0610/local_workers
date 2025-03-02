@@ -22,19 +22,19 @@ class _SignInScreenState extends State<SignInScreen> {
   final TextEditingController _passwordController = TextEditingController();
   final FocusNode _emailNode = FocusNode();
   final FocusNode _passwordNode = FocusNode();
-  final SignInScreenVM _SignInScreenVM = SignInScreenVM();
+  final SignInScreenVM _signInScreenVM = SignInScreenVM();
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     _emailNode.addListener(() {
       if (_emailNode.hasFocus) {
-        _SignInScreenVM.removeErrorMessage("email");
+        _signInScreenVM.removeErrorMessage("email");
       }
     });
     _passwordNode.addListener(() {
       if (_passwordNode.hasFocus) {
-        _SignInScreenVM.removeErrorMessage("password");
+        _signInScreenVM.removeErrorMessage("password");
       }
     });
   }
@@ -72,8 +72,8 @@ class _SignInScreenState extends State<SignInScreen> {
               padding: EdgeInsets.symmetric(
                   horizontal: 24.w(context), vertical: 24.h(context)),
               width: 343.w(context),
-              height: _SignInScreenVM.emailErrorMessage.isNotEmpty ||
-                      _SignInScreenVM.passwordErrorMessage.isNotEmpty
+              height: _signInScreenVM.emailErrorMessage.isNotEmpty ||
+                      _signInScreenVM.passwordErrorMessage.isNotEmpty
                   ? 625.h(context)
                   : 581.h(context),
               decoration: BoxDecoration(
@@ -138,9 +138,9 @@ class _SignInScreenState extends State<SignInScreen> {
                     SizedBox(
                       height: 46.h(context),
                       child: CustomTextFormField(
-                        errorMessage: _SignInScreenVM.emailErrorMessage,
+                        errorMessage: _signInScreenVM.emailErrorMessage,
                         onChanged: (value) =>
-                            _SignInScreenVM.updateEmail(value),
+                            _signInScreenVM.updateEmail(value),
                         controller: _emailController,
                         node: _emailNode,
                         borderColor: Colors.grey,
@@ -151,13 +151,13 @@ class _SignInScreenState extends State<SignInScreen> {
                       ),
                     ),
                     Visibility(
-                      visible: _SignInScreenVM.emailErrorMessage.isNotEmpty,
+                      visible: _signInScreenVM.emailErrorMessage.isNotEmpty,
                       child: SizedBox(
                         height: 2.h(context),
                         child: Visibility(
-                          visible: _SignInScreenVM.emailErrorMessage.isNotEmpty,
+                          visible: _signInScreenVM.emailErrorMessage.isNotEmpty,
                           child: Text(
-                            _SignInScreenVM.emailErrorMessage,
+                            _signInScreenVM.emailErrorMessage,
                             style: const TextStyle(color: Colors.red),
                           ),
                         ),
@@ -166,9 +166,9 @@ class _SignInScreenState extends State<SignInScreen> {
                     Align(
                       alignment: Alignment.centerLeft,
                       child: Visibility(
-                        visible: _SignInScreenVM.emailErrorMessage.isNotEmpty,
+                        visible: _signInScreenVM.emailErrorMessage.isNotEmpty,
                         child: Text(
-                          _SignInScreenVM.emailErrorMessage,
+                          _signInScreenVM.emailErrorMessage,
                           style: TextStyle(color: Colors.red),
                         ),
                       ),
@@ -191,12 +191,12 @@ class _SignInScreenState extends State<SignInScreen> {
                     SizedBox(
                       height: 46.h(context),
                       child: CustomTextFormField(
-                        errorMessage: _SignInScreenVM.passwordErrorMessage,
+                        errorMessage: _signInScreenVM.passwordErrorMessage,
                         onChanged: (value) =>
-                            _SignInScreenVM.updatePassword(value),
+                            _signInScreenVM.updatePassword(value),
                         controller: _passwordController,
                         node: _passwordNode,
-                        visibility: _SignInScreenVM.isVisible,
+                        visibility: _signInScreenVM.isVisible,
                         borderColor: Colors.grey,
                         borderRadius: 10,
                         hintText: "",
@@ -206,9 +206,9 @@ class _SignInScreenState extends State<SignInScreen> {
                         enabledfocusedBorder: Colors.grey,
                         suffixIcon: InkWell(
                           onTap: () {
-                            _SignInScreenVM.updateVisibility();
+                            _signInScreenVM.updateVisibility();
                           },
-                          child: _SignInScreenVM.isVisible
+                          child: _signInScreenVM.isVisible
                               ? Icon(Icons.visibility_off)
                               : Icon(Icons.remove_red_eye),
                         ),
@@ -218,9 +218,9 @@ class _SignInScreenState extends State<SignInScreen> {
                       alignment: Alignment.centerLeft,
                       child: Visibility(
                         visible:
-                            _SignInScreenVM.passwordErrorMessage.isNotEmpty,
+                            _signInScreenVM.passwordErrorMessage.isNotEmpty,
                         child: Text(
-                          _SignInScreenVM.passwordErrorMessage,
+                          _signInScreenVM.passwordErrorMessage,
                           style: TextStyle(color: Colors.red),
                         ),
                       ),
@@ -245,21 +245,23 @@ class _SignInScreenState extends State<SignInScreen> {
                     Observer(builder: (context) {
                       return InkWell(
                         onTap: () async {
-                          !_SignInScreenVM.isLoading
-                              ? await _SignInScreenVM.validateDetails()
+                          !_signInScreenVM.isLoading
+                              ? await _signInScreenVM.validateDetails()
                               : null; // Wait for signUp to complete
-                          if (_SignInScreenVM.isUserCanLogIn) {
+                          if (_signInScreenVM.isUserCanLogIn) {
                             Navigator.pushReplacement(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => const HomeScreen(),
+                                  builder: (context) => HomeScreen(
+                                    user: _signInScreenVM.myUser,
+                                  ),
                                 ));
                           }
                         },
                         child: CustomButton(
                           height: 48,
                           width: 295,
-                          buttonText: _SignInScreenVM.isLoading
+                          buttonText: _signInScreenVM.isLoading
                               ? const CircularProgressIndicator()
                               : const Text(
                                   "Log In",
