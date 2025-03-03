@@ -31,10 +31,27 @@ class HomeScreenProvider extends ChangeNotifier {
     try {
       isLoading = true;
       notifyListeners();
+
       String? usersResponse =
           await secureStorageService.retrieveData(AppConstants.listOfUsersKey);
+
       if (usersResponse != null && usersResponse.isNotEmpty) {
+        listOfUsers
+            .clear(); // Ensure the list is cleared before adding new users.
+
         for (var user in jsonDecode(usersResponse)) {
+          List<UserBO> myClients =
+              []; // Change from `List<dynamic>` to `List<UserBO>`
+
+          // This loop deserializes the 'clients' list for every user
+          for (var data in user['clients']) {
+            var client = JsonMapper.deserialize<UserBO>(data);
+            if (client != null) {
+              myClients.add(client);
+            }
+          }
+
+          // Add the UserBO instance to the list
           listOfUsers.add(
             UserBO(
               emailId: user['emailId'],
@@ -50,16 +67,21 @@ class HomeScreenProvider extends ChangeNotifier {
                 profileImg: user['profile']['profileImg'],
                 role: user['profile']['role'],
               ),
+              clients: myClients, // Assign the correctly typed list
             ),
           );
         }
-        filteredList = listOfUsers;
+
+        filteredList = List.from(listOfUsers);
+        print("FILTERED LIST : $filteredList");
+
         await Future.delayed(const Duration(seconds: 3));
+
         isLoading = false;
         notifyListeners();
       }
     } catch (ex) {
-      print(ex);
+      print("Error fetching users: $ex");
     }
   }
 
@@ -67,6 +89,21 @@ class HomeScreenProvider extends ChangeNotifier {
     try {
       searchText = value;
       notifyListeners();
+    } catch (ex) {
+      print(ex);
+    }
+  }
+
+  void hireWorker(UserBO client, UserBO worker) {
+    try {
+      for (var data in listOfUsers) {
+        if (data.id == worker.id) {
+          data.clients.add(client);
+          break;
+        }
+      }
+
+      print("MY NEW CLIENT IS ${listOfUsers[0].client[0].fullName}");
     } catch (ex) {
       print(ex);
     }

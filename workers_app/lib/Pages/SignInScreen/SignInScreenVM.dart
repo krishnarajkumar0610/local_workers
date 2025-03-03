@@ -99,13 +99,27 @@ class SignInScreenVM extends SignInScreenModel {
         String? listOfUserResponse = await secureStorageService
             .retrieveData(AppConstants.listOfUsersKey);
         List<dynamic> userData = [];
+
         if (listOfUserResponse != null && listOfUserResponse.isNotEmpty) {
           print("IF DA");
           userData = jsonDecode(listOfUserResponse);
+
           for (var user in userData) {
             print(user['emailId']);
+
             if (user['emailId'] == email && user['password'] == password) {
               print("IRUKU DA ${user['profile']['role']}");
+
+              List<UserBO> myClients = []; // Explicitly define as List<UserBO>
+
+              // Deserialize 'clients' and ensure proper type
+              for (var data in user['clients']) {
+                var client = JsonMapper.deserialize<UserBO>(data);
+                if (client != null) {
+                  myClients.add(client);
+                }
+              }
+
               setUser(
                 UserBO(
                   emailId: user['emailId'],
@@ -121,20 +135,23 @@ class SignInScreenVM extends SignInScreenModel {
                     profileImg: user['profile']['profileImg'],
                     role: user['profile']['role'],
                   ),
+                  clients: myClients, // Assign properly typed list
                 ),
               );
+
               print("MY USER IMAGE: ${myUser.profile.profileImg}");
               setIsUserCanLogIn(true);
               return;
             }
           }
-          setEmailErrorMessage("Email or password wrong");
+
+          setEmailErrorMessage("Email or password is incorrect");
         } else {
           setEmailErrorMessage("Email not found");
         }
       }
     } catch (ex) {
-      print(ex);
+      print("Error in validateDetails: $ex");
     }
   }
 

@@ -169,7 +169,7 @@ class _SignInScreenState extends State<SignInScreen> {
                         visible: _signInScreenVM.emailErrorMessage.isNotEmpty,
                         child: Text(
                           _signInScreenVM.emailErrorMessage,
-                          style: TextStyle(color: Colors.red),
+                          style: const TextStyle(color: Colors.red),
                         ),
                       ),
                     ),
@@ -208,8 +208,8 @@ class _SignInScreenState extends State<SignInScreen> {
                             _signInScreenVM.updateVisibility();
                           },
                           child: _signInScreenVM.isVisible
-                              ? Icon(Icons.visibility_off)
-                              : Icon(Icons.remove_red_eye),
+                              ? const Icon(Icons.visibility_off)
+                              : const Icon(Icons.remove_red_eye),
                         ),
                       ),
                     ),
@@ -220,7 +220,7 @@ class _SignInScreenState extends State<SignInScreen> {
                             _signInScreenVM.passwordErrorMessage.isNotEmpty,
                         child: Text(
                           _signInScreenVM.passwordErrorMessage,
-                          style: TextStyle(color: Colors.red),
+                          style: const TextStyle(color: Colors.red),
                         ),
                       ),
                     ),

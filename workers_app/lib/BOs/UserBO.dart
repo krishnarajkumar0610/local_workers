@@ -8,11 +8,13 @@ class UserBO {
   String fullName;
   String password;
   ProfileBO profile;
+  List<UserBO> clients;
   UserBO({
     required this.emailId,
     required this.fullName,
     required this.id,
     required this.password,
     required this.profile,
+    required this.clients,
   });
 }

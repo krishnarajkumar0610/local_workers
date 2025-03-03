@@ -1,14 +1,16 @@
-import 'dart:io';
+// ignore_for_file: unrelated_type_equality_checks
 
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:workers_app/BOs/UserBO.dart';
 import 'package:workers_app/Helpers/AppConstants/AppConstants.dart';
 import 'package:workers_app/Helpers/ResponsiveUI.dart';
-import 'package:workers_app/Pages/HomeScreen/HomeScreenProvider.dart';
+import 'package:workers_app/Pages/HomeScreen/HomeScreenProvider/HomeScreenProvider.dart';
 import 'package:workers_app/Pages/Reusables/CustomTextFormField.dart';
 import 'package:workers_app/Pages/SignInScreen/SignInScreen.dart';
 import 'package:workers_app/Pages/ThemeProvider/ThemeProvider.dart';
+import 'package:workers_app/Pages/WorkerDetailsScreen/WorkerDetailsScreen.dart';
 
 class HomeScreen extends StatefulWidget {
   final UserBO user;
@@ -19,16 +21,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  late TextEditingController _searchController;
-  late FocusNode _searchFocusNode;
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    _searchController = TextEditingController();
-    _searchFocusNode = FocusNode();
-  }
-
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
@@ -40,166 +32,160 @@ class _HomeScreenState extends State<HomeScreen> {
           return SafeArea(
             child: Scaffold(
               appBar: AppBar(
-                backgroundColor: const Color(0xff2567E8),
+                backgroundColor: Colors.blueAccent,
                 title: Text(
-                  "Welcome ${provider.user!.fullName}",
-                  style: const TextStyle(
-                    overflow: TextOverflow.ellipsis,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  "Welcome, ${provider.user?.fullName ?? "User"}",
+                  style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
                 actions: [
                   Consumer<ThemeProvider>(
                     builder: (context, themeProvider, child) {
-                      return InkWell(
-                        splashColor: Colors.transparent,
-                        highlightColor: Colors.transparent,
-                        hoverColor: Colors.transparent,
-                        onTap: () {
-                          themeProvider.updateTheme();
-                        },
-                        child: themeProvider.isDarkTheme
-                            ? const Icon(
-                                Icons.dark_mode,
-                                color: Colors.white,
-                              )
-                            : const Icon(
-                                Icons.sunny,
-                                color: Colors.yellow,
-                              ),
+                      return IconButton(
+                        onPressed: () => themeProvider.updateTheme(),
+                        icon: AnimatedSwitcher(
+                          duration: Duration(milliseconds: 300),
+                          child: Icon(
+                            themeProvider.isDarkTheme
+                                ? Icons.dark_mode
+                                : Icons.sunny,
+                            key: ValueKey<bool>(themeProvider.isDarkTheme),
+                            color: themeProvider.isDarkTheme
+                                ? Colors.white
+                                : Colors.yellow,
+                          ),
+                        ),
                       );
                     },
                   ),
-                  SizedBox(
-                    width: 15.h(context),
-                  )
+                  SizedBox(width: 15.h(context)),
                 ],
               ),
               drawer: Drawer(
                 child: Column(
                   children: [
                     UserAccountsDrawerHeader(
-                      decoration: const BoxDecoration(color: Colors.grey),
+                      decoration: BoxDecoration(color: Colors.blueAccent),
                       accountName: Text(provider.user?.fullName ?? "Guest"),
                       accountEmail: Text(provider.user?.emailId ?? "No Email"),
-                      currentAccountPicture: ClipOval(
-                        child: provider.user!.profile.profileImg.isEmpty
-                            ? Image.asset(
-                                "${AppConstants.imageBaseURL}man.png",
-                                fit: BoxFit.cover,
-                                height: 80,
-                                width: 80,
-                              )
-                            : Image.file(
-                                File(provider.user!.profile.profileImg),
-                                fit: BoxFit.cover,
-                                height: 80,
-                                width: 80,
-                              ),
+                      currentAccountPicture: CircleAvatar(
+                        backgroundImage: _getUserProfileImage(
+                            provider.user?.profile.profileImg),
                       ),
                     ),
-                    ListTile(
-                      leading: const Icon(Icons.person),
-                      title: const Text("Profile"),
-                      onTap: () {
-                        Navigator.pop(context);
-                      },
-                    ),
-                    ListTile(
-                      leading: const Icon(Icons.logout),
-                      title: const Text("Logout"),
-                      onTap: () {
-                        Navigator.pushReplacement(
+                    _buildDrawerItem(
+                        Icons.person, "Profile", () => Navigator.pop(context)),
+                    _buildDrawerItem(Icons.logout, "Logout", () {
+                      Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const SignInScreen(),
-                          ),
-                        );
-                      },
-                    ),
+                              builder: (context) => const SignInScreen()));
+                    }),
                   ],
                 ),
               ),
-              body: provider.user!.profile.role.toLowerCase() == "owner"
+              body: provider.user?.profile.role.toLowerCase() == "owner"
                   ? provider.isLoading
-                      ? const CircularProgressIndicator()
-                      : Container(
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 15.w(context),
-                              vertical: 15.h(context)),
-                          width: double.infinity,
-                          height: double.infinity,
+                      ? const Center(child: CircularProgressIndicator())
+                      : Padding(
+                          padding: EdgeInsets.all(15.w(context)),
                           child: Column(
                             children: [
-                              SizedBox(
-                                height: 50.h(context),
-                                child: CustomTextFormField(
-                                  borderColor: Colors.black,
-                                  onChanged: (value) =>
-                                      provider.updateSearchText(value),
-                                  borderRadius: 12,
-                                  hintText: "Search worker",
-                                  style: const TextStyle(),
-                                  enabledfocusedBorder: Colors.black,
-                                  node: _searchFocusNode,
-                                ),
+                              CustomTextFormField(
+                                borderColor: Colors.grey,
+                                onChanged: provider.updateSearchText,
+                                borderRadius: 12,
+                                hintText: "Search worker (eg: Driver)",
+                                style: const TextStyle(fontSize: 16),
+                                enabledfocusedBorder: Colors.grey,
+                                node: FocusNode(),
                               ),
-                              Container(
-                                height: 620,
-                                width: double.infinity,
-                                margin: EdgeInsets.only(
-                                  top: 10.h(context),
-                                ),
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: 15.w(context),
-                                ),
-                                decoration:
-                                    const BoxDecoration(color: Colors.red),
+                              Expanded(
                                 child: ListView.separated(
-                                  itemBuilder: (context, index) => Container(
-                                    margin: EdgeInsets.only(
-                                        top: index == 0 ? 5.h(context) : 0),
-                                    height: 150.h(context),
-                                    width: 200.w(context),
-                                    decoration: BoxDecoration(
-                                      color: Colors.yellow,
-                                      borderRadius:
-                                          BorderRadius.circular(12.r(context)),
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        provider.filteredList[index].profile
-                                                    .profileImg !=
-                                                null
-                                            ? Image.file(
-                                                File(provider
-                                                    .filteredList[index]
-                                                    .profile
-                                                    .profileImg),
-                                                fit: BoxFit.cover,
-                                                height: 80,
-                                                width: 80,
-                                              )
-                                            : Image.asset(
-                                                "${AppConstants.imageBaseURL}worker.png")
-                                      ],
-                                    ),
-                                  ),
+                                  padding: EdgeInsets.only(top: 10.h(context)),
+                                  itemCount: provider.filteredList
+                                      .where((worker) =>
+                                          worker.profile.role.toLowerCase() ==
+                                          "worker")
+                                      .length, // Show only workers
+                                  itemBuilder: (context, index) {
+                                    final worker = provider.filteredList
+                                        .where((worker) =>
+                                            worker.profile.role.toLowerCase() ==
+                                            "worker")
+                                        .toList()[index]; // Get worker details
+                                    return Card(
+                                      elevation: 5,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: ListTile(
+                                        leading: CircleAvatar(
+                                          backgroundImage: _getUserProfileImage(
+                                              worker.profile.profileImg),
+                                        ),
+                                        title: Text(worker.fullName,
+                                            style: const TextStyle(
+                                                fontWeight: FontWeight.bold)),
+                                        subtitle:
+                                            const Text("Tap to view details"),
+                                        trailing: const Icon(
+                                            Icons.arrow_forward_ios,
+                                            size: 16),
+                                        onTap: () {
+                                          Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    WorkerDetailsScreen(
+                                                  worker: worker,
+                                                ),
+                                              ));
+                                        },
+                                      ),
+                                    );
+                                  },
                                   separatorBuilder: (context, index) =>
-                                      SizedBox(
-                                    height: 20.h(context),
-                                  ),
-                                  itemCount: provider.filteredList.length,
+                                      SizedBox(height: 15.h(context)),
                                 ),
                               )
                             ],
                           ),
                         )
-                  : const Text("WORKER"),
+                  : _buildWorkerView(),
             ),
           );
         },
       ),
+    );
+  }
+
+  Widget _buildWorkerView() {
+    return const Center(
+      child: Text(
+        "WORKER VIEW",
+        style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+      ),
+    );
+  }
+
+// Profile image showing status
+  ImageProvider _getUserProfileImage(String? imagePath) {
+    if (imagePath != null && imagePath.isNotEmpty) {
+      final File imageFile = File(imagePath);
+      if (imageFile.existsSync()) {
+        return FileImage(imageFile);
+      }
+    }
+    return const AssetImage("${AppConstants.imageBaseURL}man.png");
+  }
+
+// Drawer items
+  Widget _buildDrawerItem(IconData icon, String title, VoidCallback onTap) {
+    return ListTile(
+      leading: Icon(icon, color: Colors.blueAccent),
+      title: Text(title,
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+      onTap: onTap,
     );
   }
 }
