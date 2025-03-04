@@ -11,16 +11,18 @@ import 'package:workers_app/Pages/material.dart';
 import 'package:workers_app/Services/SecureStorageService/ISecureStorageService.dart';
 
 class HomeScreenProvider extends ChangeNotifier {
-  UserBO? user;
-  List listOfUsers = [];
+  late UserBO user;
+  List<UserBO> listOfUsers = [];
   String searchText = "";
   bool isLoading = false;
+  bool isFileredListEmpty = false;
   ISecureStorageService secureStorageService =
       GetIt.instance.get<ISecureStorageService>();
-  List filteredList = [];
+  List<UserBO> filteredList = [];
   void setUser(UserBO user) {
     try {
       this.user = user;
+      print("USER : ${user.fullName}");
       notifyListeners();
     } catch (ex) {
       print(ex);
@@ -79,6 +81,7 @@ class HomeScreenProvider extends ChangeNotifier {
 
         isLoading = false;
         notifyListeners();
+        checkListIsEmpty();
       }
     } catch (ex) {
       print("Error fetching users: $ex");
@@ -87,23 +90,52 @@ class HomeScreenProvider extends ChangeNotifier {
 
   void updateSearchText(String value) {
     try {
-      searchText = value;
-      notifyListeners();
+      searchText = value.trim();
+
+      if (searchText.isEmpty) {
+        filteredList =
+            List.from(listOfUsers); // Ensure it's a new list reference
+      } else {
+        filteredList = listOfUsers
+            .where((workerData) => workerData.profile.jobTitle
+                .toLowerCase()
+                .contains(searchText.toLowerCase()))
+            .toList();
+      }
+
+      checkListIsEmpty();
+      notifyListeners(); // Call notifyListeners() only once
     } catch (ex) {
       print(ex);
     }
   }
 
-  void hireWorker(UserBO client, UserBO worker) {
+  Future<void> hireWorker(
+      {required UserBO client, required UserBO worker}) async {
     try {
-      for (var data in listOfUsers) {
-        if (data.id == worker.id) {
-          data.clients.add(client);
+      for (var workerData in listOfUsers) {
+        if (workerData.id == worker.id) {
+          workerData.clients.add(client);
+          print("Client ${client.fullName} added to worker ${worker.fullName}");
           break;
         }
       }
 
-      print("MY NEW CLIENT IS ${listOfUsers[0].client[0].fullName}");
+      // Instead of clearing, just update the list
+      filteredList = List.from(listOfUsers);
+      notifyListeners();
+    } catch (ex, stacktrace) {
+      print("Exception: $ex");
+      print("Stacktrace: $stacktrace");
+    }
+  }
+
+  void checkListIsEmpty() {
+    try {
+      filteredList.isEmpty
+          ? isFileredListEmpty = true
+          : isFileredListEmpty = false;
+      notifyListeners();
     } catch (ex) {
       print(ex);
     }
